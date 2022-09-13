@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 error NftMarketplace__PriceMustBeAboveZero();
 error NftMarketplace__NotApprovedForMarketplace();
 error NftMarketplace__AlreadyListed(address nftAddress, uint256 tokenId);
+error NftMarketplace__NotOwner();
 
 contract NftMarketplace is ReentrancyGuard {
     struct Listing {
@@ -40,12 +41,25 @@ contract NftMarketplace is ReentrancyGuard {
         _;
     }
 
+    modifier isOwner(
+        address nftAddress,
+        uint256 tokenId,
+        address spender
+    ) {
+        IERC721 nft = IERC721(nftAddress);
+        address owner = nft.ownerOf(tokenId);
+        if (spender != owner) {
+            revert NftMarketplace__NotOwner();
+        }
+        _;
+    }
+
     // Main functions
     function listItem(
         address nftAddress,
         uint256 tokenId,
         uint256 price
-    ) external notListed(nftAddress, tokenId, msg.sender) {
+    ) external notListed(nftAddress, tokenId, msg.sender) isOwner(nftAddress, tokenId, msg.sender) {
         if (price <= 0) {
             revert NftMarketplace__PriceMustBeAboveZero();
         }
