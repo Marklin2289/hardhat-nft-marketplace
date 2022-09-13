@@ -28,24 +28,31 @@ contract NftMarketplace is ReentrancyGuard {
     mapping(address => uint256) private s_proceeds;
 
     // modifiers
-    modifier notListed(address nftAddress, uint256 tokenId, address owner){
+    modifier notListed(
+        address nftAddress,
+        uint256 tokenId,
+        address owner
+    ) {
         Listing memory listing = s_listings[nftAddress][tokenId];
-        if(listing.price > 0) {
+        if (listing.price > 0) {
             revert NftMarketplace__AlreadyListed(nftAddress, tokenId);
         }
         _;
     }
 
-
     // Main functions
-    function listItem(address nftAddress, uint256 tokenId, uint256 price)external{
-        if(price <= 0) {
-            revert NftMarketplace__PriceMustBeAboveZero(); 
+    function listItem(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 price
+    ) external notListed(nftAddress, tokenId, msg.sender) {
+        if (price <= 0) {
+            revert NftMarketplace__PriceMustBeAboveZero();
         }
-        // 1. Send the NFT to the  contract, Transfer -> Contract "hold" the NFT. ❎  OR 
+        // 1. Send the NFT to the  contract, Transfer -> Contract "hold" the NFT. ❎  OR
         // 2. Owners can still hold their NFT, and give the marketplace approval to sell the NFT for them. ✅
         IERC721 nft = IERC721(nftAddress);
-        if(nft.getApproved(tokenId) != address(this)) {
+        if (nft.getApproved(tokenId) != address(this)) {
             revert NftMarketplace__NotApprovedForMarketplace();
         }
         s_listings[nftAddress][tokenId] = Listing(price, msg.sender);
