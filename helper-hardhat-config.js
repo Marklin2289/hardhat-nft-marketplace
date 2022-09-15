@@ -16,6 +16,7 @@ const networkConfig = {
         keepersUpdateInterval: "30",
         mintFee: "10000000000000000", // 0.01 ETH
         callbackGasLimit: "500000", // 500,000 gas
+        blockConfirmations: 6,
     },
     // Price Feed Address, values can be obtained at https://docs.chain.link/docs/reference-contracts
     // Default one is ETH/USD contract on Kovan
@@ -27,18 +28,19 @@ const networkConfig = {
         callbackGasLimit: "500000", // 500,000 gas
         mintFee: "10000000000000000", // 0.01 ETH
         subscriptionId: "8628", // add your ID here!
+        blockConfirmations: 6,
     },
     1: {
         name: "mainnet",
         subscriptionId: "8628",
         keepersUpdateInterval: "30",
+        blockConfirmations: 6,
     },
 }
 
 const DECIMALS = "18"
 const INITIAL_PRICE = "200000000000000000000"
 const developmentChains = ["hardhat", "localhost"]
-const VERIFICATION_BLOCK_CONFIRMATIONS = 6
 const frontEndContractsFile = "../nextjs-nft-marketplace-moralis-fcc/constants/networkMapping.json"
 const frontEndContractsFile2 =
     "../nextjs-nft-marketplace-thegraph-fcc/constants/networkMapping.json"
@@ -48,7 +50,6 @@ const frontEndAbiLocation2 = "../nextjs-nft-marketplace-thegraph-fcc/constants/"
 module.exports = {
     networkConfig,
     developmentChains,
-    VERIFICATION_BLOCK_CONFIRMATIONS,
     frontEndContractsFile,
     frontEndContractsFile2,
     frontEndAbiLocation,
