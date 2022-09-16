@@ -74,4 +74,28 @@ const { developmentChains } = require("../../helper-hardhat-config")
                   assert(listing.price.toString() == "0")
               })
           })
+          describe("buyItem", function () {
+              it("reverts if the item is not listed", async () => {
+                  await expect(
+                      nftMarketplace.buyItem(basicNft.address, TOKEN_ID)
+                  ).to.be.revertedWith("NftMarketplace__NotListed")
+              })
+              it("reverts if the price is not met", async () => {
+                  await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
+                  await expect(
+                      nftMarketplace.buyItem(basicNft.address, TOKEN_ID)
+                  ).to.be.revertedWith("NftMarketplace__PriceNotMet")
+              })
+              it("transfer the nft to the buyer and updates internal proceeds record", async () => {
+                  await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
+                  nftMarketplace = nftMarketplaceContract.connect(user)
+                  expect(
+                      await nftMarketplace.buyItem(basicNft.address, TOKEN_ID, { value: PRICE })
+                  ).to.emit("ItemBought")
+                  const newOwner = await basicNft.ownerOf(TOKEN_ID)
+                  const deployerProceeds = await nftMarketplace.getProceeds(deployer.address)
+                  assert(newOwner.toString() == user.address)
+                  assert(deployerProceeds.toString() == PRICE.toString())
+              })
+          })
       })
