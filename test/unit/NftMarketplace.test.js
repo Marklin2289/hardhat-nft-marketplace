@@ -119,4 +119,30 @@ const { developmentChains } = require("../../helper-hardhat-config")
                   assert(listing.price.toString() == updatedPrice.toString())
               })
           })
+          describe("withdrawProceeds", () => {
+              it("does not allow 0 proceed withdrawals", async () => {
+                  await expect(nftMarketplace.withdrawProceeds()).to.be.revertedWith(
+                      "NftMarketplace__NoProceeds"
+                  )
+              })
+              it("withdraws proceeds", async () => {
+                  await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
+                  nftMarketplace = nftMarketplaceContract.connect(user)
+                  await nftMarketplace.buyItem(basicNft.address, TOKEN_ID, { value: PRICE })
+                  nftMarketplace = nftMarketplaceContract.connect(deployer)
+
+                  const deployerProceedsBefore = await nftMarketplace.getProceeds(deployer.address)
+                  const deployerBalanceBefore = await deployer.getBalance()
+                  const txResponse = await nftMarketplace.withdrawProceeds()
+                  const txReceipt = await txResponse.wait(1)
+                  const { gasUsed, effectiveGasPrice } = txReceipt
+                  const gasCost = gasUsed.mul(effectiveGasPrice)
+                  const deployerBalanceAfter = await deployer.getBalance()
+
+                  assert(
+                      deployerBalanceAfter.add(gasCost).toString() ==
+                          deployerProceedsBefore.add(deployerBalanceBefore).toString()
+                  )
+              })
+          })
       })
