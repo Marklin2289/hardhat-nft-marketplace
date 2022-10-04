@@ -1,14 +1,29 @@
 const { ethers, network } = require("hardhat")
 const fs = require("fs")
+
 const { frontEndContractsFile } = require("../helper-hardhat-config")
+const frontEndAbiLocation = "../nextjs-nft-marketplace/constants/"
 
 module.exports = async function () {
     if (process.env.UPDATE_FRONT_END) {
         console.log("Updating front end ...")
         await updateContractAddresses()
+        await updateAbi()
     }
 }
+async function updateAbi() {
+    const nftMarketplace = await ethers.getContract("NftMarketplace")
+    fs.writeFileSync(
+        `${frontEndAbiLocation}NftMarketplace.json`,
+        nftMarketplace.interface.format(ethers.utils.FormatTypes.json)
+    )
 
+    const basicNft = await ethers.getContract("BasicNft")
+    fs.writeFileSync(
+        `${frontEndAbiLocation}BasicNft.json`,
+        basicNft.interface.format(ethers.utils.FormatTypes.json)
+    )
+}
 // create updateContractAddresses function
 async function updateContractAddresses() {
     const nftMarketplace = await ethers.getContract("NftMarketplace")
